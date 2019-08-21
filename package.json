@@ -1,0 +1,28 @@
+{
+  "name": "frank",
+  "version": "1.0.0",
+  "description": "Art-Dedicated Discord Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klerikdust/frankdiscord.git"
+  },
+  "author": "ac_dev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/klerikdust/frankdiscord/issues"
+  },
+  "homepage": "https://github.com/klerikdust/frankdiscord#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
