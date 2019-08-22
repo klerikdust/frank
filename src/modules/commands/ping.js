@@ -9,8 +9,8 @@ class Ping {
 		this.stacks = Stacks;
 	}
 	async execute() {
-		const { reply, bot } = this.stacks;
-		return reply(`Request sent in **${Math.floor(bot.ping)} ms**`)
+		const { reply, code:{PING}, bot } = this.stacks;
+		return reply(PING, {socket: [Math.floor(bot.ping)]})
 	}
 }
 

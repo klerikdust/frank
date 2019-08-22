@@ -1,9 +1,31 @@
-module.exports = (bot, message) => {
-    if (message.author.bot) return;
+const collectPost = require(`../utils/collectPost`)
+const { WATCHED_ART } = require(`../configs/domain`)
 
+module.exports = (bot, message) => {
+    //  Get client from current bot instance
+    const { registerPost } = bot.db
+
+    //  Returns true if message has an attachment.
+    const attachmentCheck = () => {
+        try {
+            return message.attachments.first().id ? true : null
+        } catch (e) {
+            return false
+        }
+    }
+
+    //  Prevent bot from replying to itself
+    if (message.author.bot) return
 
     //  Handle direct message type
     if (message.channel.type === 'dm') return dmInterface()
+
+    //  Conditions before watching the post
+    const watchable = WATCHED_ART.includes(message.channel.id) && attachmentCheck()
+    if (watchable) return collectPost({ message, registerPost })
+
+
+
 
     let prefix = process.env.PREFIX;
     let messageArray = message.content.split(" ");

@@ -12,10 +12,18 @@ module.exports = (Components) => {
     // Initialize default container
     let container = { ...Components };
 
-    //  Init color library
-    container.palette = require(`../utils/colorset`);
+    //  Get standard locale dialog to be used.
+    container.code = require(`../locale/index`).EN
 
-    /** Annie's custom system message.
+    //  Init color library
+    container.palette = require(`../configs/colorset`);
+
+    //  Returns avatar URL based on the id.
+    container.avatar = (id) => {
+        return bot.users.get(id).displayAvatarURL;
+    }
+
+    /** Frank's custom system message.
      *  @param content as the message content
      *  @param {Array} socket is the optional message modifier. Array
      *  @param {ColorResolvable} color for the embed color. Hex code
