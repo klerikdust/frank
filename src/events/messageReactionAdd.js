@@ -1,5 +1,5 @@
-const Vote = require(`../utils/artFeatureManager`);
+const Vote = require(`../utils/artFeatureManager`)
 
 module.exports = async (Components) => {
-    new Vote(Components).Add()
+	new Vote(Components).Add()
 }

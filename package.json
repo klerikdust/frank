@@ -4,7 +4,7 @@
   "description": "Art-Dedicated Discord Bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "eslint . --fix",
     "start": "nodemon index.js"
   },
   "repository": {
@@ -24,6 +24,7 @@
     "pg": "^7.12.1"
   },
   "devDependencies": {
+    "eslint": "^6.2.1",
     "nodemon": "^1.19.1"
   }
 }

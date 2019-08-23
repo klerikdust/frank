@@ -1,15 +1,15 @@
-module.exports = ({ message, registerPost }) => {
+module.exports = ({ emoji, message, registerPost }) => {
 
-    let img = message.attachments.first()
-    let metadata = [
-        message.author.id,
-        img.url,
-        message.channel.id
-    ]
+	let img = message.attachments.first()
+	let metadata = {
+		user_id: message.author.id,
+		url: img.url,
+		channel_id: message.channel.id
+	}
 
-    //  React to the message
-    message.react(`❤`)
+	//  React to the message
+	message.react(emoji)
 
-    //  Update to database
-    registerPost(metadata)
+	//  Update to database
+	registerPost(metadata)
 }

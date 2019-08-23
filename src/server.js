@@ -1,31 +1,31 @@
-module.exports = () => {
-    const { Client } = require(`discord.js`)
-    let Frank = new Client()
-    const modulesLoader = require(`./utils/modulesLoader`)
-    const express = require('express')
-    const app = express()
-    
-    //	Ping server so it won't died cause of idling.
-    app.get("/", (request, response) => response.sendStatus(200))
-    
-    //  To prevent PM2 from being terminated.
-    const listener = app.listen(process.env.PORT, () => console.log(`Port ${listener.address().port} OK`))
+module.exports = async () => {
+	const { Client } = require(`discord.js`)
+	let Frank = new Client()
+	const modulesLoader = require(`./utils/modulesLoader`)
+	const express = require(`express`)
+	const app = express()
 
-    //  Loads .env variables.
-    require(`dotenv`).config()
+	//  Loads .env variables.
+	require(`dotenv`).config()
     
-    //  Load commands.
-    Frank = new modulesLoader().register(Frank)
+	//	Ping server so it won't died cause of idling.
+	app.get(`/`, (request, response) => response.sendStatus(200))
+    
+	//  To prevent daemon from being terminated.
+	await app.listen(process.env.PORT)
+    
+	//  Load commands.
+	Frank = new modulesLoader().register(Frank)
 
-    //  Assign key to the app
-    Frank.db = require(`./db/index`)
+	//  Assign db client to the app
+	Frank.db = require(`./db/index`)()
 
-    //  Initialize database
-    Frank.db.init()
+	//  Validate database tables.
+	await Frank.db.init({connectionOnly:true})
     
-    //  Start events.
-    require("./utils/eventHandler")(Frank)
+	//  Start events.
+	require(`./utils/eventHandler`)(Frank)
     
-    //  Login.
-    Frank.login(process.env.APP_TOKEN)
+	//  Login.
+	Frank.login(process.env.APP_TOKEN)
 }

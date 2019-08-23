@@ -1,136 +1,238 @@
- const { Pool } = require(`pg`)
+const { Pool } = require(`pg`)
 
- //  Initialize client
+//  Initialize client
 const db = new Pool({
-    connectionString: process.env.DB_CONSTRING
+	connectionString: process.env.DB_CONSTRING
 })
 
-module.exports = {
+module.exports = () => {
 
-    init: async () => {
+	//	Setup container
+	let container = {}
 
-        //  Handle connection error
-        try {
-            console.time(`db init`)
-            //  Initialize client
-            const client = await db.connect()
 
-            //  Check user data table
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS userdata (
-                    user_id VARCHAR(45) NOT NULL
-                    , name VARCHAR(45) NOT NULL
-                    , registered_at TIMESTAMPTZ NOT NULL DEFAULT now()
-                    , on_channel VARCHAR(45) NOT NULL
-                )
-            `)
+	/**
+	 * 	Standard-use for single query
+	 *  @param {String} name used to describe the given query. Optional.
+	 * 	@param {String} request sql query to be executed.
+	 *  @param {Array} components parameters to be inserted into sql query.
+	 *  @param {Boolean} getValue toggle this on if you are pulling returned value from query.
+	 */
+	container._query = async ({name = ``, request = ``, components = [], getValue = false}) => {
 
-            //  Check collected_artworks table
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS collected_artworks (
-                    author VARCHAR(45) NOT NULL
-                    , url VARCHAR(450) NOT NULL
-                    , channel_id VARCHAR(45) NOT NULL
-                    , send_at TIMESTAMPTZ NOT NULL DEFAULT now()
-                )
-            `)
+		//	Handle if {name} parameter wasn't specified.
+		if (!name) name = `query`
 
-            //  Check featured table
-            await client.query(`
-                CREATE TABLE IF NOT EXISTS featured (
-                    author VARCHAR(45) NOT NULL
-                    , url VARCHAR(450) NOT NULL
-                    , channel_id VARCHAR(45) NOT NULL
-                    , heart_counts INTEGER NOT NULL DEFAULT 0
-                    , featured_at TIMESTAMPTZ NOT NULL DEFAULT now()
-                )
-            `)
+		//  Initialize client
+		const client = await db.connect()
 
-            //  Close session
-            client.end()
+		try {
+			console.time(`✔ ${name}`)
+			//  Run query
+			let res = await client.query(request, components)
 
-            console.timeEnd(`db init`)
+			//	Return value if prompted
+			if (getValue) {
+				client.end()
+				console.timeEnd(`✔ ${name}`)
+				return res.rows
+			}
 
-        } catch (e) {
-            console.log(`init failure - ${e.message}`)
-        }
-    },
+			res
+			//  Close client
+			client.end()
+			console.timeEnd(`✔ ${name}`)
 
-    registerPost: async (metadata = []) => {
-        //  Handle connection error
-        try {
-            console.time(`Post saved in`)
-            //  Initialize client
-            const client = await db.connect()
+		} catch (e) {
+			console.log(`✘ ${name} has failed to run. ${e}`)
+		}     		
+	}
 
-            //  Register into collected_artworks
-            await client.query(`
-                INSERT INTO "collected_artworks" (author, url, channel_id)
-                VALUES ($1, $2, $3)
-            `, metadata)
 
-            //  Close session
-            client.end()
-            console.timeEnd(`Post saved in`)
+	/**
+	 * 	This will be used on startup
+	 * 	@param {Boolean} connectionOnly Use only in experimental/dev. Not for production.
+	 */
+	container.init = async ({connectionOnly = false}) => {
 
-        } catch (e) {
-            console.log(`registerPost failure - ${e}`)
-        }     
-    },
+		console.clear()
+		console.log(`--BEGIN DATABASE VALIDATION--`)
 
-    featurePost: async (metadata = {}) => {
-        //  Handle connection error
-        try {
-            console.time(`Post sent to #featured in`)
+		//  Handle connection error
+		try {
 
-            //  Extracting metadata
-            const params = [
-                metadata.author,
-                metadata.url,
-                metadata.channel,
-                metadata.heart_counts
-            ]
+			//	If prompted to only check the db connection
+			if (connectionOnly) {
+				console.time(`db established in`)
+				//  Initialize client
+				const client = await db.connect()
+				//  Close session
+				client.end()
+				return console.timeEnd(`db established in`)
+			}
 
-            //  Initialize client
-            const client = await db.connect()
 
-            //  Register into featured
-            await client.query(`
-                INSERT INTO "featured" (author, url, channel_id, heart_counts)
-                VALUES ($1, $2, $3, $4)
-            `, params)
+			//  Check user_main table
+			await container._query({
+				name: `validate_user_main`,
+				request: `
+					CREATE TABLE IF NOT EXISTS user_main (
+						user_id VARCHAR(45) NOT NULL,
+						name VARCHAR(45) NOT NULL,
+						registered_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+						on_channel VARCHAR(45) NOT NULL
+					)`,
+				components: []
+			})
 
-            //  Close session
-            client.end()
-            console.timeEnd(`Post sent to #featured in`)
 
-        } catch (e) {
-            console.log(`featurePost failure - ${e}`)
-        }     
-    },
+			//  Check user_exp table
+			await container._query({
+				name: `validate_user_exp`,
+				request: `
+					CREATE TABLE IF NOT EXISTS user_exp (
+						id VARCHAR(45) NOT NULL, 
+						level INTEGER NOT NULL DEFAULT 1, 
+						currentexp INTEGER NOT NULL DEFAULT 0, 
+						maxexp INTEGER NOT NULL DEFAULT 150, 
+						curvexp INTEGER NOT NULL DEFAULT 150, 
+						last_updated TIMESTAMPTZ NOT NULL DEFAULT now()
+					)`,
+				components: []
+			})
 
-    getFeaturedPostData: async (url = ``) => {
-        //  Handle connection error
-        try {
-            console.time(`Retrieved featured post metadata in`)
-            //  Initialize client
-            const client = await db.connect()
 
-            //  Get post data
-            const res = await client.query(`
-                SELECT featured_at FROM featured WHERE url = $1
-            `, [url])
+			//  Check user_inventory table
+			await container._query({
+				name: `validate_user_inventory`,
+				request: `
+					CREATE TABLE IF NOT EXISTS user_inventory (
+						id VARCHAR(45) NOT NULL, 
+						item_name VARCHAR(45) NOT NULL, 
+						quantity INTEGER NOT NULL DEFAULT 0, 
+						last_updated TIMESTAMPTZ NOT NULL DEFAULT now()
+					)`,
+				components: []
+			})
 
-            //  Close session
-            client.end()
-            console.timeEnd(`Retrieved featured post metadata in`)
 
-            //  Return result
-            return res.rows[0]
+			//  Check user_artdata table
+			await container._query({
+				name: `validate_user_artdata`,
+				request: `
+					CREATE TABLE IF NOT EXISTS user_artdata (
+						id VARCHAR(45) NOT NULL, 
+						received_favs INTEGER NOT NULL DEFAULT 0, 
+						given_favs INTEGER NOT NULL DEFAULT 0
+					)`,
+				components: []
+			})
 
-        } catch (e) {
-            console.log(`getFeaturedPostData failure - ${e}`)
-        }          
-    }
+
+			//  Check collected_artworks table
+			await container._query({
+				name: `validate_collected_artworks`,
+				request: `
+					CREATE TABLE IF NOT EXISTS collected_artworks (
+						author VARCHAR(45) NOT NULL, 
+						url VARCHAR(450) NOT NULL, 
+						channel_id VARCHAR(45) NOT NULL, 
+						send_at TIMESTAMPTZ NOT NULL DEFAULT now()
+				  	)`,
+				components: []
+			})
+
+
+			//  Check featured table
+			await container._query({
+				name: `validate_featured`,
+				request: `
+					CREATE TABLE IF NOT EXISTS featured (
+						author VARCHAR(45) NOT NULL, 
+						url VARCHAR(450) NOT NULL, 
+						channel_id VARCHAR(45) NOT NULL, 
+						heart_counts INTEGER NOT NULL DEFAULT 0, 
+						featured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+				  	)`,
+				components: []
+			})
+			
+			
+		} catch (e) {
+			console.log(`Initialization has failed . .\n${e.message}`)
+		}
+	}
+
+
+	/**
+	 * From this point, all methods below are just a wrapper to hide the query complexity.
+	 * 
+	 * 
+	 * Add new fav point
+	 * @param {Object|UserID} user_id parameters to be inserted into sql query.
+	 */
+	container.addNewFavPoint = async ({user_id = ``}) => {
+		await container._query({
+			name: `adding_new_fav_point`,
+			request: ` 
+				UPDATE user_artdata
+				SET received_favs = received_favs + 1
+				WHERE id = $1
+				`,
+			components: [user_id]
+		})
+	}
+
+
+	/**
+	 * Watch and register the post
+	 * @param {Object|StringUserID} user_id
+	 * @param {Object|StringURL} url
+	 * @param {Object|StringChannelID} channel_id
+	 */
+	container.registerPost = async ({user_id = ``, url = ``, channel_id = ``}) => {
+		await container._query({
+			name: `registering_post`,
+			request: `
+				INSERT INTO "collected_artworks" (author, url, channel_id)
+				VALUES ($1, $2, $3)`,
+			components: [user_id, url, channel_id]
+				
+		})
+	}
+
+
+	/**
+	 * Register post metadata and send it to #featured
+	 * @param {Object|StringUserID} user_id
+	 * @param {Object|StringURL} url
+	 * @param {Object|StringChannelID} channel_id
+	 * @param {Object|Integer} heart_counts
+	 */
+	container.featurePost = async ({user_id = ``, url = ``, channel_id = ``, heart_counts = 0}) => {
+		await container._query({
+			name: `featuring_post`,
+			request: `
+				INSERT INTO "featured" (author, url, channel_id, heart_counts)
+				VALUES ($1, $2, $3, $4)`,
+			components: [user_id, url, channel_id, heart_counts]			
+		})
+	}		
+
+
+	/**
+	 * Get post metadata by url
+	 * @param {Object|StringURL} url as referrence
+	 */
+	container.getFeaturedPostData = async ({url = ``}) => {
+		return await container._query({
+			name: `fetch_featuredpost_metadata`,
+			request: `SELECT * FROM featured WHERE url = $1`,
+			components: [url],
+			getValue: true		
+		})
+	}
     
+	
+	return container
 }

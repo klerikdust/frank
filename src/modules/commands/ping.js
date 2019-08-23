@@ -6,10 +6,10 @@
  
 class Ping {
 	constructor(Stacks) {
-		this.stacks = Stacks;
+		this.stacks = Stacks
 	}
 	async execute() {
-		const { reply, code:{PING}, bot } = this.stacks;
+		const { reply, code:{PING}, bot } = this.stacks
 		return reply(PING, {socket: [Math.floor(bot.ping)]})
 	}
 }
@@ -17,10 +17,10 @@ class Ping {
 
 module.exports.help = {
 	start: Ping,
-	name: "ping",
-	aliases: ["pong", "p1ng", "poing"],
+	name: `ping`,
+	aliases: [`pong`, `p1ng`, `poing`],
 	description: `Gives bot's ping`,
 	usage: `>ping`,
-	group: "Server",
+	group: `Server`,
 	public: true,
 }
