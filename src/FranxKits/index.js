@@ -37,6 +37,7 @@ module.exports = (Components) => {
      *  @param {Boolean} prebuffer as indicator if parameter supply in "image" already contains image buffer.
      *  @param {String} header use header in an embed.
      *  @param {Array} customHeader First index as header text and second index as header icon.
+	 *  @param {Boolean} getObject returns embed object.
      */
 	container.reply = async (content, options = {
 		socket: [],
@@ -50,7 +51,8 @@ module.exports = (Components) => {
 		prebuffer: false,
 		header: null,
 		footer: null,
-		customHeader: null
+		customHeader: null,
+		getObject: false
 	}) => {
 		options.socket = !options.socket ? [] : options.socket
 		options.color = !options.color ? container.palette.darkmatte : options.color
@@ -101,6 +103,9 @@ module.exports = (Components) => {
 
 		//  If deleteIn parameter was not specified
 		if (!options.deleteIn) return options.field.send(embed)
+
+		//	Return object if prompted
+		if (options.getObject) return embed
 
 		return options.field.send(embed)
 			.then(msg => {

@@ -75,6 +75,14 @@ class VoteCollector {
 
 
 	/**
+	 * 	Updating post's favs count in #featured
+	 */
+	async updateFavs() {
+		
+	}
+
+
+	/**
      *  Register new vote and check for feature
      */
 	async Add() {
@@ -93,13 +101,14 @@ class VoteCollector {
 
         
 		//  Store new fav point
-		addNewFavPoint(this.metadata.postComponents)
+		//	Temporarily disabled
+		//addNewFavPoint(this.metadata.postComponents)
         
 
 		//  Returns if heart counts are not sufficient.
 		if (this.metadata.heartsTooLow) return
-		//  Returns if post already in #featured
-		if (await this.metadata.postAlreadyFeatured()) return
+		//  Update post's favs count if post already in #featured.
+		if (await this.metadata.postAlreadyFeatured()) return this.updateFavs()
 
 
 		//  Register post metadata
