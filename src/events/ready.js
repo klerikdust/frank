@@ -9,6 +9,8 @@ module.exports = bot => {
 	const fetchWatchedChannels = () => {
 		//	Get result and transform into an array
 		let result = (Array.from(bot.channels.get(`595741331943587850`).children.keys())).filter(e => e != feature_channel)
+		//	Append testing channel
+		result.push(`613792205072498689`)
 		//	Jsonified structure
 		let obj = { "WATCHED_ART": result }
 		//	Write to disk
