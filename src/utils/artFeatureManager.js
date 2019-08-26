@@ -89,7 +89,7 @@ class VoteCollector {
 
 		//  Calling FranxKits for useful utils
 		const { reply, avatar } = require(`../FranxKits/index`)(this.components)
-		const { addNewFavPoint, featurePost } = this.components.db
+		const { featurePost } = this.components.db
 
 
 		//  Returns if the reaction is unmatch.

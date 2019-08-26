@@ -1,5 +1,6 @@
 const collectPost = require(`../utils/collectPost`)
 const { WATCHED_ART } = require(`../configs/domain`)
+const { main_emoji } = require(`../configs/artfeaturing`)
 
 module.exports = (bot, message) => {
 	//  Get client from current bot instance
@@ -19,7 +20,7 @@ module.exports = (bot, message) => {
 
 	//  Conditions before watching the post
 	const watchable = WATCHED_ART.includes(message.channel.id) && attachmentCheck()
-	const ACmoji = bot.emojis.get(`603638774836232210`)
+	const ACmoji = bot.emojis.get(main_emoji)
 	if (watchable) return collectPost({ emoji:ACmoji, message, registerPost })
 
 
