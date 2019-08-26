@@ -6,7 +6,7 @@
   "scripts": {
     "test": "eslint . --fix",
     "start": "pm2 start index.js --no-daemon --max-memory-restart 400M",
-    "beta": "nodemon index.js"
+    "beta": "nodemon -e .js"
   },
   "repository": {
     "type": "git",
