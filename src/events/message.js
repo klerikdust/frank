@@ -20,7 +20,7 @@ module.exports = (bot, message) => {
 
 	//  Conditions before watching the post
 	const watchable = WATCHED_ART.includes(message.channel.id) && attachmentCheck()
-	const ACmoji = bot.emojis.get(main_emoji)
+	const ACmoji = bot.emojis.find(e => e.name === main_emoji)
 	if (watchable) return collectPost({ emoji:ACmoji, message, registerPost })
 
 

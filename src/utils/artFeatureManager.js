@@ -62,7 +62,7 @@ class VoteCollector {
 				return this.favs < this.featured_requirement
 			},
 			get unmatchEmoji() {
-				return Stacks.reaction.emoji.id !== this.main_emoji
+				return Stacks.reaction.emoji.name !== this.main_emoji
 			},
 			get nonArtChannels() {
 				return !WATCHED_ART.includes(this.msg.channel.id)
