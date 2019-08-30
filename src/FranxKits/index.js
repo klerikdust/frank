@@ -18,6 +18,12 @@ module.exports = (Components) => {
 	//  Init color library
 	container.palette = require(`../configs/colorset`)
 
+	//	Extract parameter
+	container.userparams = Components.args.join(` `)
+
+	//	Assign db
+	container.db = bot.db
+
 	//  Returns avatar URL based on the id.
 	container.avatar = (id) => {
 		return bot.users.get(id).displayAvatarURL

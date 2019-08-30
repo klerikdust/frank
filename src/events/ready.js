@@ -21,7 +21,8 @@ module.exports = bot => {
 		})
 	}
 
-	fetchWatchedChannels()
+	//	Don't fetch channel if in dev environment
+	if (!process.env.IN_DEV) fetchWatchedChannels()
 
 	console.clear()
 	console.log(`${bot.user.username} has successfully login.`)
